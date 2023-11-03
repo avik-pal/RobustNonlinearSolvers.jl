@@ -27,11 +27,13 @@ prob = NonlinearProblem{false}(newton_fails, u0, p)
 sol1 = solve(prob, NewtonRaphson())
 sol1.retcode
 sol1.resid
+sol1.stats
 
 # Fails
 sol2 = solve(prob, PseudoTransient())
 sol2.retcode
 sol2.resid
+sol2.stats
 
 # Tune and Pass
 sol3 = solve(prob, PseudoTransient(; alpha_initial = 1.0))
@@ -39,9 +41,48 @@ sol3.retcode
 sol3.resid
 sol3.stats
 
-# Continuous Solver
+# Continuous Solver: Adaptive Time Stepping
+sol4 = solve(prob, ContinuousNonlinearSolveAlgorithm(ImplicitEuler()))
+sol4.retcode
+sol4.resid
+sol4.stats
 
+# Continuous Solver: Fixed Time Stepping -- fails
+sol5 = solve(prob, ContinuousNonlinearSolveAlgorithm(Euler()); dt = 1.0)
+sol5.retcode
+sol5.resid
+sol5.stats
 
-# Our Solver
+# Auto Switching
+sol6 = solve(prob, CompositeNonlinearSolveAlgorithm())
+sol6.retcode
+sol6.resid
+sol6.stats
+```
 
+```julia
+function quadratic_f!(du, u, p)
+    du .= abs2.(u) .- p
+end
+
+u0 = -ones(1000) .* 10.0
+prob = NonlinearProblem(quadratic_f!, u0, 2.0)
+
+# PT -- doesn't work
+sol1 = solve(prob, PseudoTransient())
+
+# PT -- again doesn't work
+sol2 = solve(prob, PseudoTransient(; alpha_initial = 10.0))
+
+# Newton -- works
+sol3 = solve(prob, NewtonRaphson())
+
+# Implicit Euler -- doesn't work
+sol4 = solve(prob, ContinuousNonlinearSolveAlgorithm(ImplicitEuler()))
+
+# Tsit5 -- doesn't works
+sol5 = solve(prob, ContinuousNonlinearSolveAlgorithm(Tsit5()))
+
+# Auto Switching -- works
+sol6 = solve(prob, CompositeNonlinearSolveAlgorithm())
 ```

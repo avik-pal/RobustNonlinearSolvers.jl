@@ -8,11 +8,15 @@ import PrecompileTools: @recompile_invalidations
 end
 
 import NonlinearSolve: perform_step!
-import SciMLBase: __init, __solve, solve!
+import SciMLBase: init, __init, solve, __solve, solve!, NLStats
+
+abstract type AbstractSwitchingAlgorithm end
 
 include("solve/continuous.jl")
 include("solve/composite.jl")
+include("switching.jl")
 
-export ContinuousNonlinearSolveAlgorithm
+export ContinuousNonlinearSolveAlgorithm, CompositeNonlinearSolveAlgorithm
+export PseudoTransientSwitching
 
 end
