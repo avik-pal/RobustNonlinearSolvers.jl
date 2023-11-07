@@ -59,30 +59,3 @@ sol6.retcode
 sol6.resid
 sol6.stats
 ```
-
-```julia
-function quadratic_f!(du, u, p)
-    du .= abs2.(u) .- p
-end
-
-u0 = -ones(1000) .* 10.0
-prob = NonlinearProblem(quadratic_f!, u0, 2.0)
-
-# PT -- doesn't work
-sol1 = solve(prob, PseudoTransient())
-
-# PT -- again doesn't work
-sol2 = solve(prob, PseudoTransient(; alpha_initial = 10.0))
-
-# Newton -- works
-sol3 = solve(prob, NewtonRaphson())
-
-# Implicit Euler -- doesn't work
-sol4 = solve(prob, ContinuousNonlinearSolveAlgorithm(ImplicitEuler()))
-
-# Tsit5 -- doesn't works
-sol5 = solve(prob, ContinuousNonlinearSolveAlgorithm(Tsit5()))
-
-# Auto Switching -- works
-sol6 = solve(prob, CompositeNonlinearSolveAlgorithm())
-```
